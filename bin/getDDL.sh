@@ -45,7 +45,7 @@ getData() {
 }
 
 pretty=false
-while getopts ":ht:w:c:d:-:" opt; do
+while getopts ":hpc:d:-:" opt; do
 	case ${opt} in
 		c)
 			collection=${OPTARG}

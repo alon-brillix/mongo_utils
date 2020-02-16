@@ -31,7 +31,7 @@ function getDDL(collection, pretty) {
 	output += `${DDL.createCollection};\n`
 	if (DDL.shard !== undefined) output += `db.adminCommand(${JSON.stringify(DDL.shard)});\n`
 	for (var i = 0; i < DDL.indexes.length; i++){
-		output += `${DDL.indexes[i]};`
+		output += `${DDL.indexes[i]};\n`
 	}
 	if (pretty === true) output += `\n/*-- ${database}.${collection} --*/`
 	return output;
