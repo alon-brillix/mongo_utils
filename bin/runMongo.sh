@@ -11,7 +11,7 @@ getDir() {
 	echo ${DIR}
 }
 [ -f ~/.mongo.env ] && . ~/.mongo.env
-DIR=$(getDir)
+DIR="$(getDir)/.."
 
 script=$1
 host=${2:-${MONGOS}}

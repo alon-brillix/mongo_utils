@@ -1,4 +1,12 @@
-load(DIR+'/../.mongocolorize.js');
+function green(n) {return n}
+function red(n) {return n}
+var colorize = DIR+'/.mongocolorize.js'
+try {
+	load(colorize);
+} catch(err) {
+	print(`Cannot find ${colorize}. Disabling colors!`);
+}
+
 function trafficlight(n) {
 	if (n < 10) return green(n);
 	if (n < 30) return yellow(n);
