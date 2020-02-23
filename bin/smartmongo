@@ -8,9 +8,6 @@ MONGO="mongo --norc --quiet -u ${MONGO_USER} -p ${MONGO_PASSWORD} --authenticati
 MONGO_INTERACTIVE="mongo -u ${MONGO_USER} -p ${MONGO_PASSWORD} --authenticationDatabase admin"
 MONGOS_HOST=${MONGOS}
 MONGOS="${MONGO} --host ${MONGOS_HOST}"
-echo MONGOS_HOST=${MONGOS_HOST}
-echo MONGOS=${MONGOS}
-read userinput
 
 ##########################################
 ## CONSTANTS and utility functions
@@ -162,7 +159,6 @@ EOV
 
 
 printout() {
-	# echo "$1" | while read line; do
 	local line="$1"
 	rsId=$(echo $line | cut -d' ' -f1)
 	memberId=$(echo $line | cut -d' ' -f2)
@@ -332,9 +328,11 @@ main() {
 ## Main Entry point
 ##########################################
 if [[ $1 != "" ]];then
-	echo "mongos> ${MONGOS_HOST}"
-	${MONGO_INTERACTIVE} --host $1 skyfence
+	MONGO_HOST=$1
+	[[ $1 == "." ]] && MONGO_HOST=${MONGOS_HOST}
+	echo "Login to> ${MONGO_HOST}"
+	${MONGO_INTERACTIVE} --host ${MONGO_HOST} skyfence
 else
-	echo "mongos> ${mongosHost}"
+	echo "mongos> ${MONGOS_HOST}"
 	main
 fi
