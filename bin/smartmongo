@@ -1,0 +1,340 @@
+#!/bin/bash
+
+##########################################
+## Setup connection variables
+##########################################
+[ -f ~/.mongo.env ] && . ~/.mongo.env
+MONGO="mongo --norc --quiet -u ${MONGO_USER} -p ${MONGO_PASSWORD} --authenticationDatabase admin"
+MONGO_INTERACTIVE="mongo -u ${MONGO_USER} -p ${MONGO_PASSWORD} --authenticationDatabase admin"
+MONGOS_HOST=${MONGOS}
+MONGOS="${MONGO} --host ${MONGOS_HOST}"
+echo MONGOS_HOST=${MONGOS_HOST}
+echo MONGOS=${MONGOS}
+read userinput
+
+##########################################
+## CONSTANTS and utility functions
+##########################################
+GAP_WARNING=2
+GAP_CRITICAL=10
+TABSIZE=4
+
+DEBUG() {
+	if [[ ${debug} == "true" ]];then
+		echo "$1"
+	fi
+}
+
+RED() {
+	text=$1
+	echo -e "\e[31m${text}\e[0m"
+}
+GREEN() {
+	text=$1
+	echo -e "\e[32m${text}\e[0m"
+}
+BLUE() {
+	text=$1
+	echo -e "\e[36m${text}\e[0m"
+}
+YELLOW() {
+	text=$1
+	echo -e "\e[93m${text}\e[0m"
+}
+MAGENTA() {
+	text=$1
+	echo -e "\e[35m${text}\e[0m"
+}
+colorReplicaState() {
+	text=$1
+	case $text in
+		"PRIMARY")
+			msg=$(GREEN $text)
+			;;
+		"SECONDARY")
+			msg=$(YELLOW $text)
+			;;
+		"ARBITER")
+			msg=$(BLUE $text)
+			;;
+		"*")
+			msg=$(RED $text)
+			;;
+	esac
+	echo "$msg"
+}
+
+colorOptimeGap() {
+	gap=$1
+	if (( ${gap} > ${GAP_CRITICAL} )); then
+		msg=$(RED ${gap})
+	elif (( ${gap} > ${GAP_WARNING} )); then
+		msg=$(YELLOW ${gap})
+	else
+		msg=${gap}
+	fi
+	echo "${msg}"
+}
+
+colorReachedState() {
+	state=$1
+	if [[ ${state} == "true" ]];then
+		echo -e "$(GREEN √)"
+	fi
+}
+echo -e "$(RED red)$(GREEN green)$(BLUE blue)$(YELLOW yellow)"
+echo -e "$(RED ---)$(GREEN -----)$(BLUE ----)$(YELLOW ------)"
+
+
+##########################################
+## Mongo variables and functions
+##########################################
+read -r -d '' LIST_CONFIG << EOV
+(function getConfigMembers() {
+	db = db.getSiblingDB('admin');
+	var stat = db.runCommand('getShardMap');
+	var members = stat.map.config.split('/')[1].split(',');
+	for (var i in members) {
+		print (members[i]);
+	}
+})()
+EOV
+
+read -r -d '' LIST_SHARDS << EOV
+(function getDataMembers() {
+	db = db.getSiblingDB('config');
+	var shard, shards;
+	var members = [];
+	db.shards.find().forEach(function(shard) {
+		shards = shard.host.split('/')[1].split(',');
+		for (var j in shards) {
+			members.push(shards[j]);
+		}
+	});
+	for (var i in members) {
+		print (members[i]);
+	}
+})()
+EOV
+
+read -r -d '' GET_REPL_STAT << EOV
+function getOptime(member) {
+	return member.optimeDate.getTime();
+}
+function getPrimaryOptime(members) {
+	var member;
+	for (var i in members) {
+		member = members[i];
+		if (member.stateStr === 'PRIMARY') {
+			return getOptime(member);
+		}
+	}
+}
+db = db.getSiblingDB('admin');
+var stat = db.runCommand( { replSetGetStatus : 1 } );
+var rs = stat.set;
+var members = stat.members;
+var primaryOpTime = getPrimaryOptime(members);
+var member, optimeGap;
+var validStates = ['PRIMARY', 'SECONDARY', 'ARBITER'];
+var opt = 1;
+var lastHeartbeatMessage;
+for (var i in members) {
+	member = members[i];
+	optimeGap = '0';
+		lastHeartbeatMessage = '';
+	if (validStates.indexOf(member.stateStr) < 0) {
+		lastHeartbeatMessage = member.lastHeartbeatMessage;
+		optimeGap = 'N/A';
+	}
+	else if (member.stateStr === 'SECONDARY') {
+		optimeGap = (primaryOpTime - getOptime(member)) / 1000; /*Seconds*/
+	}
+	var self = member.self === true ? "true" : "false";
+
+	if (member.stateStr === 'ARBITER') {
+		self = 'N/A'
+	}
+	print(rs, member._id, member.name, member.stateStr, optimeGap, self, lastHeartbeatMessage);
+}
+print('hostname:' + db.getSiblingDB('local').me.findOne().host);
+EOV
+
+
+printout() {
+	# echo "$1" | while read line; do
+	local line="$1"
+	rsId=$(echo $line | cut -d' ' -f1)
+	memberId=$(echo $line | cut -d' ' -f2)
+	memberName=$(echo $line | cut -d' ' -f3)
+	memberState_plain=$(echo $line | cut -d' ' -f4)
+	memberState=$(colorReplicaState ${memberState_plain})
+	reachedState=$(colorReachedState $(echo $line | cut -d' ' -f5))
+	optimeGap=$(echo $line | cut -d' ' -f6)
+	# Color the gap or omit it
+	if [[ ${memberState_plain} == "SECONDARY" ]] && (( ${optimeGap} > 0 )); then
+		optimeGap="(gap: $(colorOptimeGap ${optimeGap}))"
+	else
+		optimeGap=""
+	fi
+
+	lastHeartbeatMessage=$(echo ${line}|cut -d' ' -f7)
+
+	# Add non arbiter members to All members list
+	if [[ ${memberState_plain} == 'ARBITER' ]];then
+		opt='-'
+	else
+		allMembers+=("${memberName}")
+		opt=$(MAGENTA ${#allMembers[@]})
+	fi
+
+	local sepCount=1
+	local longest=$(echo SECONDARY|wc -c)
+	local stateLen=$(echo ${memberState_plain}|wc -c)
+	missingLength=$((${longest}-${stateLen}))
+	if (( ${missingLength} > 0 ));then
+		sepCount=$((sepCount+(missingLength/TABSIZE+1)))
+	fi
+	seperator=$(seq  -s '' ${sepCount}|tr '0123456789' '\t')
+	echo -e "${opt}\t${rsId} ${memberName}\t${memberState}${seperator}${reachedState} ${optimeGap} ${lastHeartbeatMessage}"
+}
+
+printoutMlv() {
+	local mlv="$1"
+	while read line;do
+		DEBUG "${line}"
+		printout "${line}"
+	done < <(echo "${mlv}")
+}
+sortPSA() {
+	local rs="$1"
+	order="10 PRIMARY\n20 SECONDARY\n30 ARBITER"
+	join -1 2 -2 4 <(echo -e "${order}"|sort -k2) <(echo -e "${rs}"|sort -k4)|sort -k3,3 -k2,2|awk -v OFS=' ' '{print $3, $4, $5, $1, $7, $6, $8}'
+}
+
+getReplStat() {
+	host=$1
+	cmd="${MONGO} ${host}/admin"
+	result=$(echo -e "${GET_REPL_STAT}"|${cmd})
+	rtn=$?
+	if [[ ${rtn} != 0 ]];then
+		echo -e "Error connecting to $(BLUE ${host})"
+	fi
+	echo "${result}"
+	return ${rtn}
+}
+
+getDataShards() {
+	#
+	# return nlv
+	#
+	echo ${LIST_SHARDS} | ${MONGOS}
+}
+
+getConfigShards() {
+	#
+	# return nlv
+	#
+	echo ${LIST_CONFIG} | ${MONGOS}
+}
+
+listShards() {
+	# Arguments
+	local members="$1" # Multi-line
+
+	# Local variables
+	local reachedMembers=()
+	local memberLines=()
+	local othersLine
+	local nodeHostName
+
+	while read member; do  # Loop over a Multi-line variable
+		DEBUG "member>${member}"
+		checkRs=$(getReplStat ${member}) # Multi-line
+		DEBUG "checkRs> ${checkRs}"
+		rtn=$?
+		if [[ ${rtn} != 0 ]];then
+			echo -e "${checkRs}"
+		else
+			selfLine=$(echo "${checkRs}"|grep "${member}") # Single-line
+			othersLine="${othersLine}"$(echo "${checkRs}"|grep -v "${member}"|grep -v "hostname:")"\n" # Multi-line
+			nodeHostName=$(echo "${checkRs}"|grep "hostname:"|cut -d':' -f2)
+			reachedMembers+=("${member}") # Array
+			memberLines+=("${selfLine} ${nodeHostName}") # Array
+			DEBUG "len: ${#reachedMembers[@]} member: ${member} ${selfLine} ${nodeHostName}"
+		fi
+	done < <(echo "${members}")
+	DEBUG "reached members=> ${#reachedMembers[@]}"
+
+	#
+	# Add non-reached members to memberLines
+	#
+	DEBUG "last otherLines:"
+	while read line; do  # Loop over a Multi-line variable
+		if [[ ! -z "${line}" ]];then
+			member=$(echo $line|cut -d' ' -f3)
+			DEBUG "${line}; member=${member}"
+			if [[ " ${memberLines[@]} " =~ " ${member} " ]];then
+				DEBUG "${member} was reaached already"
+			else
+				DEBUG "${member} was never reaached"
+				memberLines+=("${line}")
+			fi
+		fi
+	done < <(echo -e "${othersLine}")
+
+	DEBUG "convert array to mlv:"
+	mlv=$( IFS=$'\n'; echo "${memberLines[*]}")
+	DEBUG "${mlv}"
+	DEBUG "Now print it sorted"
+	sorted=$(sortPSA "${mlv}")
+	printoutMlv "${sorted}"
+}
+
+connect() {
+	maxOpt=${#allMembers[@]}
+	DEBUG "maxOpt: ${maxOpt}"
+	while :;do
+		echo -n "connect to? "
+		read userinput
+		if [[ ${userinput} == "" ]];then
+			echo "Connecting to local mongos"
+			${MONGO_INTERACTIVE} --host ${MONGOS_HOST} skyfence
+			break
+		elif (( ${userinput} >= 1 && ${userinput} <= ${maxOpt} ));then
+			userinput=$((userinput-1))
+			DEBUG "userinput: $userinput"
+			echo "Connecting to ${allMembers[$userinput]}"
+			${MONGO_INTERACTIVE} --host ${allMembers[$userinput]} skyfence
+			break
+		fi
+		echo "Invalid input. Please choose 1-${maxOpt} or leave empty to connect to local mongos"
+	done
+}
+
+main() {
+	tabs ${TABSIZE}
+	allMembers=()
+	listShards "$(getConfigShards)"
+	MAGENTA "--------------------------------------------"
+	listShards "$(getDataShards)"
+
+	DEBUG '=================== loop over array ===================='
+	for i in "${!allMembers[@]}";do  # Loop over array
+		DEBUG "am: $i ${allMembers[$i]}"
+	done
+	DEBUG "The fifth server is ${allMembers[4]}"
+
+	connect
+}
+
+##########################################
+## Main Entry point
+##########################################
+if [[ $1 != "" ]];then
+	echo "mongos> ${MONGOS_HOST}"
+	${MONGO_INTERACTIVE} --host $1 skyfence
+else
+	echo "mongos> ${mongosHost}"
+	main
+fi
