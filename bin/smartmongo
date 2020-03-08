@@ -45,16 +45,16 @@ MAGENTA() {
 colorReplicaState() {
 	text=$1
 	case $text in
-		"PRIMARY")
+		PRIMARY)
 			msg=$(GREEN $text)
 			;;
-		"SECONDARY")
+		SECONDARY)
 			msg=$(YELLOW $text)
 			;;
-		"ARBITER")
+		ARBITER)
 			msg=$(BLUE $text)
 			;;
-		"*")
+		*)
 			msg=$(RED $text)
 			;;
 	esac
@@ -140,7 +140,7 @@ for (var i in members) {
 	member = members[i];
 	optimeGap = '0';
 		lastHeartbeatMessage = '';
-	if (validStates.indexOf(member.stateStr) < 0) {
+	if (validStates.indexOf(member.stateStr) < 0 && member.lastHeartbeatMessage !== undefined) {
 		lastHeartbeatMessage = member.lastHeartbeatMessage;
 		optimeGap = 'N/A';
 	}
@@ -204,7 +204,7 @@ printoutMlv() {
 }
 sortPSA() {
 	local rs="$1"
-	order="10 PRIMARY\n20 SECONDARY\n30 ARBITER"
+	order="10 PRIMARY\n20 SECONDARY\n90 ARBITER\n40 STARTUP2\n41 STARTUP\n42 RECOVERING\n43 DOWN\n44 ROLLBACK\n45 REMOVED"
 	join -1 2 -2 4 <(echo -e "${order}"|sort -k2) <(echo -e "${rs}"|sort -k4)|sort -k3,3 -k2,2|awk -v OFS=' ' '{print $3, $4, $5, $1, $7, $6, $8}'
 }
 
@@ -271,9 +271,9 @@ listShards() {
 			member=$(echo $line|cut -d' ' -f3)
 			DEBUG "${line}; member=${member}"
 			if [[ " ${memberLines[@]} " =~ " ${member} " ]];then
-				DEBUG "${member} was reaached already"
+				DEBUG "${member} was reached already"
 			else
-				DEBUG "${member} was never reaached"
+				DEBUG "${member} was never reached"
 				memberLines+=("${line}")
 			fi
 		fi
