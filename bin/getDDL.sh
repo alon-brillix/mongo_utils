@@ -1,4 +1,6 @@
 #!/bin/bash
+[ -f ~/.mongo.env ] && . ~/.mongo.env
+
 getDir() {
 	local SOURCE="${BASH_SOURCE[0]}"
 	local DIR
@@ -10,7 +12,6 @@ getDir() {
 	DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 	echo ${DIR}
 }
-[ -f ~/.mongo.env ] && . ~/.mongo.env
 DIR=$(getDir)
 
 usage() {

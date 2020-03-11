@@ -1,3 +1,6 @@
+#!/bin/bash
+[ -f ~/.mongo.env ] && . ~/.mongo.env
+
 usage() {
 	local str
 	read -d '' str <<-EOF
@@ -29,7 +32,7 @@ mock() {
 	echo $RANDOM
 }
 
-. .mongo.env
+
 getData() {
 	mongo --quiet --host ${MONGOS}  -u ${MONGO_USER} -p ${MONGO_PASSWORD} --authenticationDatabase admin ${MONGO_DB} --eval "db.${collection}.count()"
 }
@@ -55,11 +58,13 @@ graph() {
 		gap=$((${line}-${prev}))
 
 		if (( ${gap} < 0 ));then
-			line1+="$(GREEN ${gap}),"
+			#line1+="$(GREEN ${gap}),"
+			line1+="${gap},"
 			line3+=" ,"
 		elif (( ${gap} > 0 ));then
 			line1+=" ,"
-			line3+="$(RED ${gap}),"
+			#line3+="$(RED ${gap}),"
+			line3+="${gap},"
 		else
 			line1+=" ,"
 			line3+=" ,"
@@ -68,7 +73,7 @@ graph() {
 		prev=${line}
 	done # Array
 
-	echo -e "${line1}\n${line2}\n${line3}"
+	echo -e "$(GREEN ${line1})\n${line2}\n$(RED ${line3})"
 }
 
 getMore() {
