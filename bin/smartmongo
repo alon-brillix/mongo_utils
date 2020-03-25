@@ -308,7 +308,7 @@ connect() {
 	done
 }
 
-main() {
+printClusterNodes() {
 	tabs ${TABSIZE}
 	allMembers=()
 	listShards "$(getConfigShards)"
@@ -320,19 +320,21 @@ main() {
 		DEBUG "am: $i ${allMembers[$i]}"
 	done
 	DEBUG "The fifth server is ${allMembers[4]}"
-
-	connect
 }
 
 ##########################################
 ## Main Entry point
 ##########################################
-if [[ $1 != "" ]];then
+if [[ $1 = "-n" ]];then
+	echo "mongos> ${MONGOS_HOST} (non-interactive)"
+	printClusterNodes
+elif [[ $1 != "" ]];then
 	MONGO_HOST=$1
 	[[ $1 == "." ]] && MONGO_HOST=${MONGOS_HOST}
 	echo "Login to> ${MONGO_HOST}"
 	${MONGO_INTERACTIVE} --host ${MONGO_HOST} skyfence
 else
 	echo "mongos> ${MONGOS_HOST}"
-	main
+	printClusterNodes
+	connect
 fi
