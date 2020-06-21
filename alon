@@ -1,0 +1,312 @@
+[31mred[0m[32mgreen[0m[36mblue[0m[93myellow[0m
+[31m---[0m[32m-----[0m[36m----[0m[93m------[0m
+mongos> localhost (non-interactive)
+[3g   H    H    H    H    H    H    H    H    H    H    H    H    H    H    H    H    H    H    H    H
+member>10.1.1.111:27019
+checkRs> admin
+csReplSet 0 10.1.1.111:27019 PRIMARY 0 true 
+csReplSet 1 10.1.1.112:27019 SECONDARY 0 false 
+csReplSet 2 10.1.2.113:27019 SECONDARY 0 false 
+hostname:mongod1-fr.skyfence.com
+len: 1 member: 10.1.1.111:27019 csReplSet 0 10.1.1.111:27019 PRIMARY 0 true  mongod1-fr.skyfence.com
+member>10.1.1.112:27019
+checkRs> admin
+csReplSet 0 10.1.1.111:27019 PRIMARY 0 false 
+csReplSet 1 10.1.1.112:27019 SECONDARY 0 true 
+csReplSet 2 10.1.2.113:27019 SECONDARY 0 false 
+hostname:mongod2-fr.skyfence.com
+len: 2 member: 10.1.1.112:27019 csReplSet 1 10.1.1.112:27019 SECONDARY 0 true  mongod2-fr.skyfence.com
+member>10.1.2.113:27019
+checkRs> admin
+csReplSet 0 10.1.1.111:27019 PRIMARY 0 false 
+csReplSet 1 10.1.1.112:27019 SECONDARY 0 false 
+csReplSet 2 10.1.2.113:27019 SECONDARY 0 true 
+hostname:mongod3-fr.skyfence.com
+len: 3 member: 10.1.2.113:27019 csReplSet 2 10.1.2.113:27019 SECONDARY 0 true  mongod3-fr.skyfence.com
+reached members=> 3
+last otherLines:
+admin; member=admin
+admin was never reached
+csReplSet 1 10.1.1.112:27019 SECONDARY 0 false; member=10.1.1.112:27019
+10.1.1.112:27019 was reached already
+csReplSet 2 10.1.2.113:27019 SECONDARY 0 false; member=10.1.2.113:27019
+10.1.2.113:27019 was reached already
+admin; member=admin
+admin was reached already
+csReplSet 0 10.1.1.111:27019 PRIMARY 0 false; member=10.1.1.111:27019
+10.1.1.111:27019 was reached already
+csReplSet 2 10.1.2.113:27019 SECONDARY 0 false; member=10.1.2.113:27019
+10.1.2.113:27019 was reached already
+admin; member=admin
+admin was reached already
+csReplSet 0 10.1.1.111:27019 PRIMARY 0 false; member=10.1.1.111:27019
+10.1.1.111:27019 was reached already
+csReplSet 1 10.1.1.112:27019 SECONDARY 0 false; member=10.1.1.112:27019
+10.1.1.112:27019 was reached already
+convert array to mlv:
+csReplSet 0 10.1.1.111:27019 PRIMARY 0 true  mongod1-fr.skyfence.com
+csReplSet 1 10.1.1.112:27019 SECONDARY 0 true  mongod2-fr.skyfence.com
+csReplSet 2 10.1.2.113:27019 SECONDARY 0 true  mongod3-fr.skyfence.com
+admin
+Now print it sorted
+csReplSet 0 10.1.1.111:27019 PRIMARY true 0 mongod1-fr.skyfence.com
+[35m1[0m	csReplSet 10.1.1.111:27019	[32mPRIMARY[0m		[32m√[0m  mongod1-fr.skyfence.com
+csReplSet 1 10.1.1.112:27019 SECONDARY true 0 mongod2-fr.skyfence.com
+[35m2[0m	csReplSet 10.1.1.112:27019	[93mSECONDARY[0m	[32m√[0m  mongod2-fr.skyfence.com
+csReplSet 2 10.1.2.113:27019 SECONDARY true 0 mongod3-fr.skyfence.com
+[35m3[0m	csReplSet 10.1.2.113:27019	[93mSECONDARY[0m	[32m√[0m  mongod3-fr.skyfence.com
+[35m--------------------------------------------[0m
+member>10.1.1.147:27010
+checkRs> admin
+rs1 3 10.1.2.113:27010 ARBITER 0 N/A 
+rs1 4 10.1.2.120:27010 (not reachable/healthy) N/A false Connection refused
+rs1 5 10.1.1.147:27010 SECONDARY 0 true 
+rs1 6 10.1.1.243:27010 PRIMARY 0 false 
+hostname:mongod1-rs1-fr.skyfence.com
+len: 1 member: 10.1.1.147:27010 rs1 5 10.1.1.147:27010 SECONDARY 0 true  mongod1-rs1-fr.skyfence.com
+member>10.1.1.243:27010
+checkRs> admin
+rs1 3 10.1.2.113:27010 ARBITER 0 N/A 
+rs1 4 10.1.2.120:27010 (not reachable/healthy) N/A false Connection refused
+rs1 5 10.1.1.147:27010 SECONDARY 1 false 
+rs1 6 10.1.1.243:27010 PRIMARY 0 true 
+hostname:mongod2-rs1-fr.skyfence.com
+len: 2 member: 10.1.1.243:27010 rs1 6 10.1.1.243:27010 PRIMARY 0 true  mongod2-rs1-fr.skyfence.com
+member>10.1.2.120:27010
+checkRs> Error connecting to [36m10.1.2.120:27010[0m
+2020-03-25T13:52:10.063+0000 W NETWORK  [thread1] Failed to connect to 10.1.2.120:27010, reason: errno:111 Connection refused
+2020-03-25T13:52:10.063+0000 E QUERY    [thread1] Error: couldn't connect to server 10.1.2.120:27010, connection attempt failed :
+connect@src/mongo/shell/mongo.js:231:14
+@(connect):1:21
+Error connecting to [36m10.1.2.120:27010[0m
+2020-03-25T13:52:10.063+0000 W NETWORK  [thread1] Failed to connect to 10.1.2.120:27010, reason: errno:111 Connection refused
+2020-03-25T13:52:10.063+0000 E QUERY    [thread1] Error: couldn't connect to server 10.1.2.120:27010, connection attempt failed :
+connect@src/mongo/shell/mongo.js:231:14
+@(connect):1:21
+member>10.1.1.82:27010
+checkRs> admin
+rs2 1 10.1.2.166:27010 PRIMARY 0 false 
+rs2 2 10.1.2.110:27010 SECONDARY 0 false 
+rs2 3 10.1.1.82:27010 SECONDARY 0 true 
+rs2 4 10.1.2.113:27011 ARBITER 0 N/A 
+hostname:mongod3-rs2-fr.skyfence.com
+len: 3 member: 10.1.1.82:27010 rs2 3 10.1.1.82:27010 SECONDARY 0 true  mongod3-rs2-fr.skyfence.com
+member>10.1.2.110:27010
+checkRs> admin
+rs2 1 10.1.2.166:27010 PRIMARY 0 false 
+rs2 2 10.1.2.110:27010 SECONDARY 0 true 
+rs2 3 10.1.1.82:27010 SECONDARY 0 false 
+rs2 4 10.1.2.113:27011 ARBITER 0 N/A 
+hostname:mongod2-rs2-fr.skyfence.com
+len: 4 member: 10.1.2.110:27010 rs2 2 10.1.2.110:27010 SECONDARY 0 true  mongod2-rs2-fr.skyfence.com
+member>10.1.2.166:27010
+checkRs> admin
+rs2 1 10.1.2.166:27010 PRIMARY 0 true 
+rs2 2 10.1.2.110:27010 SECONDARY 0 false 
+rs2 3 10.1.1.82:27010 SECONDARY 0 false 
+rs2 4 10.1.2.113:27011 ARBITER 0 N/A 
+hostname:mongod1-rs2-fr.skyfence.com
+len: 5 member: 10.1.2.166:27010 rs2 1 10.1.2.166:27010 PRIMARY 0 true  mongod1-rs2-fr.skyfence.com
+member>10.1.1.145:27010
+checkRs> admin
+rs3 1 10.1.2.38:27010 PRIMARY 0 false 
+rs3 2 10.1.1.254:27010 SECONDARY 0 false 
+rs3 3 10.1.1.145:27010 SECONDARY 0 true 
+rs3 4 10.1.2.113:27012 ARBITER 0 N/A 
+hostname:mongod3-rs3-fr.skyfence.com
+len: 6 member: 10.1.1.145:27010 rs3 3 10.1.1.145:27010 SECONDARY 0 true  mongod3-rs3-fr.skyfence.com
+member>10.1.1.254:27010
+checkRs> admin
+rs3 1 10.1.2.38:27010 PRIMARY 0 false 
+rs3 2 10.1.1.254:27010 SECONDARY 0 true 
+rs3 3 10.1.1.145:27010 SECONDARY 0 false 
+rs3 4 10.1.2.113:27012 ARBITER 0 N/A 
+hostname:mongod2-rs3-fr.skyfence.com
+len: 7 member: 10.1.1.254:27010 rs3 2 10.1.1.254:27010 SECONDARY 0 true  mongod2-rs3-fr.skyfence.com
+member>10.1.2.38:27010
+checkRs> admin
+rs3 1 10.1.2.38:27010 PRIMARY 0 true 
+rs3 2 10.1.1.254:27010 SECONDARY 0 false 
+rs3 3 10.1.1.145:27010 SECONDARY 0 false 
+rs3 4 10.1.2.113:27012 ARBITER 0 N/A 
+hostname:mongod1-rs3-fr.skyfence.com
+len: 8 member: 10.1.2.38:27010 rs3 1 10.1.2.38:27010 PRIMARY 0 true  mongod1-rs3-fr.skyfence.com
+member>10.1.1.245:27010
+checkRs> admin
+rs4 1 10.1.2.43:27010 PRIMARY 0 false 
+rs4 2 10.1.2.16:27010 SECONDARY 0 false 
+rs4 3 10.1.1.245:27010 SECONDARY 0 true 
+rs4 4 10.1.2.113:27013 ARBITER 0 N/A 
+hostname:mongod3-rs4-fr.skyfence.com
+len: 9 member: 10.1.1.245:27010 rs4 3 10.1.1.245:27010 SECONDARY 0 true  mongod3-rs4-fr.skyfence.com
+member>10.1.2.16:27010
+checkRs> admin
+rs4 1 10.1.2.43:27010 PRIMARY 0 false 
+rs4 2 10.1.2.16:27010 SECONDARY 0 true 
+rs4 3 10.1.1.245:27010 SECONDARY 0 false 
+rs4 4 10.1.2.113:27013 ARBITER 0 N/A 
+hostname:mongod2-rs4-fr.skyfence.com
+len: 10 member: 10.1.2.16:27010 rs4 2 10.1.2.16:27010 SECONDARY 0 true  mongod2-rs4-fr.skyfence.com
+member>10.1.2.43:27010
+checkRs> admin
+rs4 1 10.1.2.43:27010 PRIMARY 0 true 
+rs4 2 10.1.2.16:27010 SECONDARY 0 false 
+rs4 3 10.1.1.245:27010 SECONDARY 0 false 
+rs4 4 10.1.2.113:27013 ARBITER 0 N/A 
+hostname:mongod1-rs4-fr.skyfence.com
+len: 11 member: 10.1.2.43:27010 rs4 1 10.1.2.43:27010 PRIMARY 0 true  mongod1-rs4-fr.skyfence.com
+reached members=> 11
+last otherLines:
+admin; member=admin
+admin was never reached
+rs1 3 10.1.2.113:27010 ARBITER 0 N/A; member=10.1.2.113:27010
+10.1.2.113:27010 was never reached
+rs1 4 10.1.2.120:27010 (not reachable/healthy) N/A false Connection refused; member=10.1.2.120:27010
+10.1.2.120:27010 was never reached
+rs1 6 10.1.1.243:27010 PRIMARY 0 false; member=10.1.1.243:27010
+10.1.1.243:27010 was reached already
+admin; member=admin
+admin was reached already
+rs1 3 10.1.2.113:27010 ARBITER 0 N/A; member=10.1.2.113:27010
+10.1.2.113:27010 was reached already
+rs1 4 10.1.2.120:27010 (not reachable/healthy) N/A false Connection refused; member=10.1.2.120:27010
+10.1.2.120:27010 was reached already
+rs1 5 10.1.1.147:27010 SECONDARY 1 false; member=10.1.1.147:27010
+10.1.1.147:27010 was reached already
+admin; member=admin
+admin was reached already
+rs2 1 10.1.2.166:27010 PRIMARY 0 false; member=10.1.2.166:27010
+10.1.2.166:27010 was reached already
+rs2 2 10.1.2.110:27010 SECONDARY 0 false; member=10.1.2.110:27010
+10.1.2.110:27010 was reached already
+rs2 4 10.1.2.113:27011 ARBITER 0 N/A; member=10.1.2.113:27011
+10.1.2.113:27011 was never reached
+admin; member=admin
+admin was reached already
+rs2 1 10.1.2.166:27010 PRIMARY 0 false; member=10.1.2.166:27010
+10.1.2.166:27010 was reached already
+rs2 3 10.1.1.82:27010 SECONDARY 0 false; member=10.1.1.82:27010
+10.1.1.82:27010 was reached already
+rs2 4 10.1.2.113:27011 ARBITER 0 N/A; member=10.1.2.113:27011
+10.1.2.113:27011 was reached already
+admin; member=admin
+admin was reached already
+rs2 2 10.1.2.110:27010 SECONDARY 0 false; member=10.1.2.110:27010
+10.1.2.110:27010 was reached already
+rs2 3 10.1.1.82:27010 SECONDARY 0 false; member=10.1.1.82:27010
+10.1.1.82:27010 was reached already
+rs2 4 10.1.2.113:27011 ARBITER 0 N/A; member=10.1.2.113:27011
+10.1.2.113:27011 was reached already
+admin; member=admin
+admin was reached already
+rs3 1 10.1.2.38:27010 PRIMARY 0 false; member=10.1.2.38:27010
+10.1.2.38:27010 was reached already
+rs3 2 10.1.1.254:27010 SECONDARY 0 false; member=10.1.1.254:27010
+10.1.1.254:27010 was reached already
+rs3 4 10.1.2.113:27012 ARBITER 0 N/A; member=10.1.2.113:27012
+10.1.2.113:27012 was never reached
+admin; member=admin
+admin was reached already
+rs3 1 10.1.2.38:27010 PRIMARY 0 false; member=10.1.2.38:27010
+10.1.2.38:27010 was reached already
+rs3 3 10.1.1.145:27010 SECONDARY 0 false; member=10.1.1.145:27010
+10.1.1.145:27010 was reached already
+rs3 4 10.1.2.113:27012 ARBITER 0 N/A; member=10.1.2.113:27012
+10.1.2.113:27012 was reached already
+admin; member=admin
+admin was reached already
+rs3 2 10.1.1.254:27010 SECONDARY 0 false; member=10.1.1.254:27010
+10.1.1.254:27010 was reached already
+rs3 3 10.1.1.145:27010 SECONDARY 0 false; member=10.1.1.145:27010
+10.1.1.145:27010 was reached already
+rs3 4 10.1.2.113:27012 ARBITER 0 N/A; member=10.1.2.113:27012
+10.1.2.113:27012 was reached already
+admin; member=admin
+admin was reached already
+rs4 1 10.1.2.43:27010 PRIMARY 0 false; member=10.1.2.43:27010
+10.1.2.43:27010 was reached already
+rs4 2 10.1.2.16:27010 SECONDARY 0 false; member=10.1.2.16:27010
+10.1.2.16:27010 was reached already
+rs4 4 10.1.2.113:27013 ARBITER 0 N/A; member=10.1.2.113:27013
+10.1.2.113:27013 was never reached
+admin; member=admin
+admin was reached already
+rs4 1 10.1.2.43:27010 PRIMARY 0 false; member=10.1.2.43:27010
+10.1.2.43:27010 was reached already
+rs4 3 10.1.1.245:27010 SECONDARY 0 false; member=10.1.1.245:27010
+10.1.1.245:27010 was reached already
+rs4 4 10.1.2.113:27013 ARBITER 0 N/A; member=10.1.2.113:27013
+10.1.2.113:27013 was reached already
+admin; member=admin
+admin was reached already
+rs4 2 10.1.2.16:27010 SECONDARY 0 false; member=10.1.2.16:27010
+10.1.2.16:27010 was reached already
+rs4 3 10.1.1.245:27010 SECONDARY 0 false; member=10.1.1.245:27010
+10.1.1.245:27010 was reached already
+rs4 4 10.1.2.113:27013 ARBITER 0 N/A; member=10.1.2.113:27013
+10.1.2.113:27013 was reached already
+convert array to mlv:
+rs1 5 10.1.1.147:27010 SECONDARY 0 true  mongod1-rs1-fr.skyfence.com
+rs1 6 10.1.1.243:27010 PRIMARY 0 true  mongod2-rs1-fr.skyfence.com
+rs2 3 10.1.1.82:27010 SECONDARY 0 true  mongod3-rs2-fr.skyfence.com
+rs2 2 10.1.2.110:27010 SECONDARY 0 true  mongod2-rs2-fr.skyfence.com
+rs2 1 10.1.2.166:27010 PRIMARY 0 true  mongod1-rs2-fr.skyfence.com
+rs3 3 10.1.1.145:27010 SECONDARY 0 true  mongod3-rs3-fr.skyfence.com
+rs3 2 10.1.1.254:27010 SECONDARY 0 true  mongod2-rs3-fr.skyfence.com
+rs3 1 10.1.2.38:27010 PRIMARY 0 true  mongod1-rs3-fr.skyfence.com
+rs4 3 10.1.1.245:27010 SECONDARY 0 true  mongod3-rs4-fr.skyfence.com
+rs4 2 10.1.2.16:27010 SECONDARY 0 true  mongod2-rs4-fr.skyfence.com
+rs4 1 10.1.2.43:27010 PRIMARY 0 true  mongod1-rs4-fr.skyfence.com
+admin
+rs1 3 10.1.2.113:27010 ARBITER 0 N/A
+rs1 4 10.1.2.120:27010 (not reachable/healthy) N/A false Connection refused
+rs2 4 10.1.2.113:27011 ARBITER 0 N/A
+rs3 4 10.1.2.113:27012 ARBITER 0 N/A
+rs4 4 10.1.2.113:27013 ARBITER 0 N/A
+Now print it sorted
+rs1 6 10.1.1.243:27010 PRIMARY true 0 mongod2-rs1-fr.skyfence.com
+[35m4[0m	rs1 10.1.1.243:27010	[32mPRIMARY[0m		[32m√[0m  mongod2-rs1-fr.skyfence.com
+rs1 5 10.1.1.147:27010 SECONDARY true 0 mongod1-rs1-fr.skyfence.com
+[35m5[0m	rs1 10.1.1.147:27010	[93mSECONDARY[0m	[32m√[0m  mongod1-rs1-fr.skyfence.com
+rs1 3 10.1.2.113:27010 ARBITER N/A 0
+-	rs1 10.1.2.113:27010	[36mARBITER[0m		  
+rs2 1 10.1.2.166:27010 PRIMARY true 0 mongod1-rs2-fr.skyfence.com
+[35m6[0m	rs2 10.1.2.166:27010	[32mPRIMARY[0m		[32m√[0m  mongod1-rs2-fr.skyfence.com
+rs2 2 10.1.2.110:27010 SECONDARY true 0 mongod2-rs2-fr.skyfence.com
+[35m7[0m	rs2 10.1.2.110:27010	[93mSECONDARY[0m	[32m√[0m  mongod2-rs2-fr.skyfence.com
+rs2 3 10.1.1.82:27010 SECONDARY true 0 mongod3-rs2-fr.skyfence.com
+[35m8[0m	rs2 10.1.1.82:27010	[93mSECONDARY[0m	[32m√[0m  mongod3-rs2-fr.skyfence.com
+rs2 4 10.1.2.113:27011 ARBITER N/A 0
+-	rs2 10.1.2.113:27011	[36mARBITER[0m		  
+rs3 1 10.1.2.38:27010 PRIMARY true 0 mongod1-rs3-fr.skyfence.com
+[35m9[0m	rs3 10.1.2.38:27010	[32mPRIMARY[0m		[32m√[0m  mongod1-rs3-fr.skyfence.com
+rs3 2 10.1.1.254:27010 SECONDARY true 0 mongod2-rs3-fr.skyfence.com
+[35m10[0m	rs3 10.1.1.254:27010	[93mSECONDARY[0m	[32m√[0m  mongod2-rs3-fr.skyfence.com
+rs3 3 10.1.1.145:27010 SECONDARY true 0 mongod3-rs3-fr.skyfence.com
+[35m11[0m	rs3 10.1.1.145:27010	[93mSECONDARY[0m	[32m√[0m  mongod3-rs3-fr.skyfence.com
+rs3 4 10.1.2.113:27012 ARBITER N/A 0
+-	rs3 10.1.2.113:27012	[36mARBITER[0m		  
+rs4 1 10.1.2.43:27010 PRIMARY true 0 mongod1-rs4-fr.skyfence.com
+[35m12[0m	rs4 10.1.2.43:27010	[32mPRIMARY[0m		[32m√[0m  mongod1-rs4-fr.skyfence.com
+rs4 2 10.1.2.16:27010 SECONDARY true 0 mongod2-rs4-fr.skyfence.com
+[35m13[0m	rs4 10.1.2.16:27010	[93mSECONDARY[0m	[32m√[0m  mongod2-rs4-fr.skyfence.com
+rs4 3 10.1.1.245:27010 SECONDARY true 0 mongod3-rs4-fr.skyfence.com
+[35m14[0m	rs4 10.1.1.245:27010	[93mSECONDARY[0m	[32m√[0m  mongod3-rs4-fr.skyfence.com
+rs4 4 10.1.2.113:27013 ARBITER N/A 0
+-	rs4 10.1.2.113:27013	[36mARBITER[0m		  
+=================== loop over array ====================
+am: 0 10.1.1.111:27019
+am: 1 10.1.1.112:27019
+am: 2 10.1.2.113:27019
+am: 3 10.1.1.243:27010
+am: 4 10.1.1.147:27010
+am: 5 10.1.2.166:27010
+am: 6 10.1.2.110:27010
+am: 7 10.1.1.82:27010
+am: 8 10.1.2.38:27010
+am: 9 10.1.1.254:27010
+am: 10 10.1.1.145:27010
+am: 11 10.1.2.43:27010
+am: 12 10.1.2.16:27010
+am: 13 10.1.1.245:27010
+The fifth server is 10.1.1.147:27010

@@ -261,8 +261,8 @@ listShards() {
 	while read member; do  # Loop over a Multi-line variable
 		DEBUG "member>${member}"
 		checkRs=$(getReplStat ${member}) # Multi-line
-		DEBUG "checkRs> ${checkRs}"
 		rtn=$?
+		DEBUG "checkRs> ${checkRs}"
 		if [[ ${rtn} != 0 ]];then
 			echo -e "${checkRs}"
 		else
