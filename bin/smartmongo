@@ -4,8 +4,22 @@
 ## Setup connection variables
 ##########################################
 [ -f ~/.mongo.env ] && . ~/.mongo.env
-MONGO="mongo --norc --quiet -u ${MONGO_USER} -p ${MONGO_PASSWORD} --authenticationDatabase admin"
-MONGO_INTERACTIVE="mongo -u ${MONGO_USER} -p ${MONGO_PASSWORD} --authenticationDatabase admin"
+
+MONGO_INTERACTIVE="mongo"
+
+if [[ ${MONGO_USER} != "" && ${MONGO_PASSWORD} != "" ]];then
+	MONGO_INTERACTIVE="${MONGO_INTERACTIVE} -u ${MONGO_USER} -p ${MONGO_PASSWORD} --authenticationDatabase admin"
+fi
+if [[ ${PEM} != "" ]];then
+	MONGO_INTERACTIVE="${MONGO_INTERACTIVE} --tls --tlsCertificateKeyFile ${PEM}"
+fi
+if [[ ${CA} != "" ]];then
+	MONGO_INTERACTIVE="${MONGO_INTERACTIVE} --tlsCAFile ${CA}"
+fi
+
+MONGO="${MONGO_INTERACTIVE} --norc --quiet"
+
+
 MONGOS_HOST=${MONGOS}
 MONGOS="${MONGO} --host ${MONGOS_HOST}"
 
@@ -154,7 +168,7 @@ for (var i in members) {
 	}
 	print(rs, member._id, member.name, member.stateStr, optimeGap, self, lastHeartbeatMessage);
 }
-print('hostname:' + db.getSiblingDB('local').me.findOne().host);
+print('hostname:' + db.serverStatus().host);
 EOV
 
 

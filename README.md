@@ -6,6 +6,8 @@ MONGOS=<ip|hostnme>
 MONGO_USER=<username>
 MONGO_PASSWORD=<password>
 MONGO_DB=<database>
+PEM=</path/to/client.pem>
+CA=</path/to/CA.crt>
 ```
 
 You can source the file __deploy.sh__ in order to set up the path for both .bash_profile and shell session
