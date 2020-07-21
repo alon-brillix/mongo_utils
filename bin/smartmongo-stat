@@ -88,6 +88,7 @@ vverbose connectTo=${connectTo}
 ##########################################
 [ -f ~/.mongo.env ] && . ~/.mongo.env
 
+NEVER() {
 MONGO_INTERACTIVE="mongo"
 
 if [[ ${MONGO_USER} != "" && ${MONGO_PASSWORD} != "" ]];then
@@ -105,6 +106,7 @@ MONGO="${MONGO_INTERACTIVE} --norc --quiet"
 
 MONGOS_HOST=${MONGOS}
 MONGOS="${MONGO} --host ${MONGOS_HOST}"
+}
 
 ##########################################
 ## CONSTANTS and utility functions
@@ -439,6 +441,12 @@ printClusterNodes() {
 }
 
 ##########################################
+. ${DIR}/../.MONGO.include
+
+function connect() {
+	[[ -z ${startMongoShellOutput} ]] && startMongoShellOutput=$(eval $(echo "$(MONGO) --quiet --norc --host ${MONGOS} --eval 'print(1)'")|wc -l)
+	eval $(echo "$(MONGO) ${connectOpts} $@")|tail -n +${startMongoShellOutput}
+}
 
 read -r -d '' GET_REPL_NODES << EOV
  const nodename = db.hostInfo().system.hostname;
@@ -453,11 +461,13 @@ read -r -d '' GET_CLUSTER_NODES << EOV
 EOV
 
 getClusterNodes() {
-	echo ${GET_CLUSTER_NODES} | ${MONGOS}
+	#echo ${GET_CLUSTER_NODES} | ${MONGOS}
+	echo ${GET_CLUSTER_NODES}|connect --quiet --norc --host ${MONGOS}
 }
 getMemberStat() {
 	local member=$1
-	echo ${GET_REPL_NODES} | ${MONGO} --host ${member}
+	#echo ${GET_REPL_NODES} | ${MONGO} --host ${member}
+	echo ${GET_REPL_NODES}|connect --quiet --norc --host ${member}
 }
 random() {
 	local length=${1-10}
@@ -518,7 +528,7 @@ distinct() {
 			gapList[${node}]=0
 		elif [[ ${state} == SECONDARY && ${member} == ${node} ]];then
 			gapList[${node}]=$(expr ${primaryList[${rs}]} - ${optime})
-			vverbose "${state}[${rs}]=${member} (${gapList[${node}]})"
+			vverbose "${status}[${rs}]=${member} (${gapList[${node}]})"
 		fi
 			
 		
@@ -531,10 +541,6 @@ testthis() {
 ##########################################
 ## Main Entry point
 ##########################################
-#echo MOGNOS: ${MONGOS}
-#echo stat: mdb4-uk.skyfence.com
-#getMemberStat mdb4-uk.skyfence.com:27010
-#echo action=${action}
 vverbose THIS=[$THIS]
 if [[ ${action} == "" ]];then
 	verbose "CONNECT"

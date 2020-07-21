@@ -1,0 +1,71 @@
+#!/bin/bash
+
+promptParameterValue() {
+	local paramName=$1
+	local paramValue=""
+	while [[ -z "${paramValue}" ]]; do
+		read -p "enter the ${paramName} " paramValue 
+	done
+	echo "${paramValue}"
+}
+
+optmod() {
+	local optString=$(echo $1|tr -s ',' ' ')
+	local opt=$2
+	local delim=${3:-,}
+	local optArr
+	read -a optArr <<< ${optString}
+	for word in "${optArr[@]}"; do 
+		if [[ ${word} == ${opt} ]]; then
+			echo true
+			return
+		fi
+	done
+	echo false
+}
+
+envmod() {
+	### environment variable preceeds data from envFile
+	local envFile=$1
+	local varname=$2
+	local delim=','
+	local value=$(echo "${delim}${!varname}${delim}$(grep ^\s*${varname}= ${envFile}|tail -1|cut -d= -f2)${delim}"|sed "s/^${delim}\+\([^${delim}]\+\)$delim.*/\1/"| sed -r "s/^${delim}{3}$//"|sed "s/^[\"']//"|sed "s/[\"']$//")
+	echo $value
+}
+
+MONGO() {
+	#local mynameis=$(promptParameterValue mynameis)
+	local envFile=$HOME/.mongo.env
+	local opts # comma delimiter of options: noauth,notls
+	while getopts ":f:o:" opt; do
+		case ${opt} in 
+			f)
+				envFile=${OPTARG}
+				;;
+			o)
+				opts=${OPTARG}
+				;;
+		esac
+	done
+
+	local output=mongo
+	local _HOST=$(envmod ${envFile} MONGOS)
+	local _USER=$(envmod ${envFile} MONGO_USER)
+	local _PASSWORD=$(envmod ${envFile} MONGO_PASSWORD)
+	local _DB=$(envmod ${envFile} MONGO_DB)
+	local _PEM=$(envmod ${envFile} PEM)
+	local _CA=$(envmod ${envFile} CA)
+	local _TLS=$(envmod ${envFile} TLS)
+	local _AUTHDB=$(envmod ${envFile} AUTHDB); [[ -z "${_AUTHDB}" ]] && _AUTHDB=admin
+
+	[[ -n ${_USER} && $(optmod "${opts}" noauth) == false ]] && output+=" -u ${_USER} --authenticationDatabase ${_AUTHDB}"
+	[[ -n ${_PASSWORD} && $(optmod "${opts}" noauth) == false ]] && output+=" -p ${_PASSWORD}"
+	[[ -n ${_PEM} || -n ${_CA} ]] && [[ $(optmod "${opts}" notls) == false ]] && output+=" --tls"
+	[[ -n ${_PEM} && $(optmod "${opts}" notls) == false ]] && output+=" --tlsCertificateKeyFile ${_PEM}"
+	[[ -n ${_CA} && $(optmod "${opts}" notls) == false ]] && output+=" --tlsCAFile ${_CA}"
+	[[ -n ${_TLS} && $(optmod "${opts}" notls) == false ]] && output+=" ${_TLS}"
+
+	#declare -p; return
+	echo "${output}"
+}
+
